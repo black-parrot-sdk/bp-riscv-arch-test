@@ -104,6 +104,7 @@ class spike(pluginTemplate):
           self.isa += 'd'
       if "C" in ispec["ISA"]:
           self.isa += 'c'
+      self.isa=ispec["ISA"].lower().replace('z','Z').replace('su','')
 
       #TODO: The following assumes you are using the riscv-gcc toolchain. If
       #      not please change appropriately
