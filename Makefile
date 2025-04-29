@@ -13,6 +13,7 @@ CD := cd
 WGET := wget
 MV := mv
 PYTHON := python3
+PIP := pip3
 RISCOF := riscof
 CAT := cat
 SED := sed
@@ -25,35 +26,15 @@ TAR := tar
 RISCOF_URL ?= git+https://github.com/riscv/riscof.git
 config.ini:
 	$(GIT) submodule update --init --recursive
-	$(MKDIR) -p $(WORKDIR)/bin
 	$(SED) "s#\$${TOP}#$(CURDIR)#g" config.ini.template > $@
 	$(PYTHON) -m pip install $(RISCOF_URL)
-	cd riscv-arch-test/riscv-ctg; $(PYTHON) -m pip install --editable .
-	cd riscv-arch-test/riscv-isac; $(PYTHON) -m pip install --editable .
+	$(CD) riscv-arch-test/riscv-ctg; $(PYTHON) -m pip install --editable .
+	$(CD) riscv-arch-test/riscv-isac; $(PYTHON) -m pip install --editable .
 
-Z3_VERSION := z3-4.13.3
-Z3_URL := https://github.com/Z3Prover/z3.git
-$(WORKDIR)/bin/z3: | config.ini
-	$(CD) $(WORKDIR); \
-		$(GIT) clone -b $(Z3_VERSION) $(Z3_URL)
-	$(CD) $(WORKDIR)/z3; \
-		$(PYTHON) scripts/mk_make.py
-	$(CD) $(WORKDIR)/z3/build; \
-		$(MAKE) PREFIX=$(WORKDIR) all install
-
-OPAMROOT := $(WORKDIR)/opam
-OPAM_VERSION := 2.2.1
-OPAM_BINARY := opam-$(OPAM_VERSION)-x86_64-linux
-OPAM_URL := https://github.com/ocaml/opam/releases/download/$(OPAM_VERSION)/$(OPAM_BINARY)
-$(WORKDIR)/bin/opam: | $(WORKDIR)/bin/z3
-	$(WGET) $(OPAM_URL) -P $(WORKDIR)
-	$(MV) $(WORKDIR)/$(OPAM_BINARY) $@
-	$(MKEXE) $@
-	$@ init -y --disable-sandboxing --root=$(OPAMROOT)
-	$@ install sail -y --root=$(OPAMROOT)
-
-$(WORKDIR)/bin/riscv_sim_RV64: $(WORKDIR)/bin/opam
+$(WORKDIR)/bin/riscv_sim_RV64: config.ini
+	$(MKDIR) -p $(@D)
 	$(MAKE) ARCH=RV64 -C sail-riscv
+	$(PIP) install riscof
 	$(CP) sail-riscv/c_emulator/riscv_sim_RV64 $@
 
 RVARCH_DIR := $(TOP)/riscv-arch-test
