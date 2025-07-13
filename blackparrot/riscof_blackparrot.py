@@ -72,7 +72,7 @@ class blackparrot(pluginTemplate):
        # Note the march is not hardwired here, because it will change for each
        # test. Similarly the output elf name and compile macros will be assigned later in the
        # runTests function
-       self.compile_cmd = 'riscv{1}-unknown-elf-dramfs-gcc -march={0} -mabi=lp64 \
+       self.compile_cmd = 'riscv{1}-unknown-elf-gcc -march={0} -mabi=lp64 \
          -static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles -g\
          -T '+self.pluginpath+'/env/link.ld\
          -I '+self.pluginpath+'/env/\
